@@ -2,7 +2,7 @@ import React from 'react'
 import Home from './pages/Home'
 import City from './pages/City'
 import Map from './pages/Map'
-import { NavLink, Route, Switch, Redirect } from 'react-router-dom'
+import { Route, Switch, Redirect } from 'react-router-dom'
 
 class App extends React.Component {
   render() {
