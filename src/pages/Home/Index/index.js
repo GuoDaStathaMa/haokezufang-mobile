@@ -2,12 +2,13 @@ import React from 'react'
 import { Carousel, Flex } from 'antd-mobile'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
+import { getCityPosition } from 'tools'
 import './index.scss'
 
-import Nav1 from '../../../assets/images/nav-1.png'
-import Nav2 from '../../../assets/images/nav-2.png'
-import Nav3 from '../../../assets/images/nav-3.png'
-import Nav4 from '../../../assets/images/nav-4.png'
+import Nav1 from 'assets/images/nav-1.png'
+import Nav2 from 'assets/images/nav-2.png'
+import Nav3 from 'assets/images/nav-3.png'
+import Nav4 from 'assets/images/nav-4.png'
 
 class Index extends React.Component {
   state = {
@@ -15,7 +16,8 @@ class Index extends React.Component {
     imgHeight: 212,
     isLoaded: false,
     groupList: [],
-    newsList: []
+    newsList: [],
+    cityPosition: '北京'
   }
   // 获取轮播图信息
   async getSwiper() {
@@ -50,10 +52,14 @@ class Index extends React.Component {
     })
   }
   // 调用axios
-  componentDidMount() {
+  async componentDidMount() {
     this.getSwiper()
     this.getGroup()
     this.getNews()
+    const city = await getCityPosition()
+    this.setState({
+      cityPosition: city.label
+    })
   }
   // 渲染轮播图封装
   renderSwiper() {
@@ -83,6 +89,31 @@ class Index extends React.Component {
           </a>
         ))}
       </Carousel>
+    )
+  }
+  // 顶部搜索框
+  renderSearch() {
+    return (
+      <Flex className="search-box">
+        <Flex className="search-form">
+          <div
+            className="location"
+            onClick={() => this.props.history.push('/city')}
+          >
+            <span className="name">{this.state.cityPosition}</span>
+            <i className="iconfont icon-arrow"> </i>
+          </div>
+          <div className="search-input">
+            <i className="iconfont icon-seach" />
+            <span className="text">请输入小区地址</span>
+          </div>
+        </Flex>
+        {/* 地图小图标 */}
+        <i
+          className="iconfont icon-map"
+          onClick={() => this.props.history.push('/map')}
+        />
+      </Flex>
     )
   }
   // 渲染导航封装
@@ -181,7 +212,10 @@ class Index extends React.Component {
     return (
       <div className="index">
         {/* 轮播图 */}
-        <div className="swiper">{this.renderSwiper()}</div>
+        <div className="swiper">
+          {this.renderSearch()}
+          {this.renderSwiper()}
+        </div>
         {/* 导航 */}
         <div className="nav">{this.renderNav()}</div>
         {/* 租房小组 */}
