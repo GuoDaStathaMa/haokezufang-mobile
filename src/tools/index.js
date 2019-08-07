@@ -5,7 +5,7 @@ function getCity() {
   return JSON.parse(localStorage.getItem('Positions'))
 }
 
-function setCity(city) {
+export function setCity(city) {
   localStorage.setItem('Positions', JSON.stringify(city))
 }
 

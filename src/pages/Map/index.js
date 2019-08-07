@@ -1,6 +1,6 @@
 import React from 'react'
+import NavHeader from 'common/NavHeader'
 import './index.scss'
-import { NavBar } from 'antd-mobile'
 const BMap = window.BMap
 
 class Map extends React.Component {
@@ -16,22 +16,10 @@ class Map extends React.Component {
     map.addOverlay(marker)
   }
 
-  renderNavBar() {
-    return (
-      <NavBar
-        mode="light"
-        icon={<i className="iconfont icon-back" />}
-        onLeftClick={() => this.props.history.go(-1)}
-      >
-        地图找房
-      </NavBar>
-    )
-  }
-
   render() {
     return (
       <div className="map">
-        <div className="navBar">{this.renderNavBar()}</div>
+        <NavHeader />
         <div id="container" />
       </div>
     )

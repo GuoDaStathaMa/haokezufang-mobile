@@ -1,23 +1,25 @@
 import React from 'react'
-import { NavBar } from 'antd-mobile'
+import { Toast } from 'antd-mobile'
 import { AutoSizer, List } from 'react-virtualized'
-import { getCityPosition } from 'tools'
+import { getCityPosition, setCity } from 'tools'
+import NavHeader from 'common/NavHeader'
 import './index.scss'
 import axios from 'axios'
-
-// // 提供virtualized渲染数据
-// const list = Array.from(new Array(10000)).map(
-//   (item, index) => `${index}-假数据展示`
-// )
+// 北上广深
+const includeCities = ['北京', '上海', '广州', '深圳']
 // navBar_height
 const TITLE_HEIGHT = 36
 // city_el_height
 const CITI_HIGHT = 50
 class City extends React.Component {
-  state = {
-    shortList: [],
-    citiesObj: {},
-    currentCityShort: 0
+  constructor(props) {
+    super(props)
+    this.state = {
+      shortList: [],
+      citiesObj: {},
+      currentCityShort: 0
+    }
+    this.listRef = React.createRef()
   }
 
   formatData(list) {
@@ -57,24 +59,14 @@ class City extends React.Component {
       shortList,
       citiesObj
     })
-    console.log(this.state.citiesObj, this.state.shortList)
   }
 
-  componentDidMount() {
-    this.getcitiesObj()
+  async componentDidMount() {
+    await this.getcitiesObj()
+    // 解决为完全加载问题 virtualized
+    // this.listRef.current.measureAllRows()
   }
 
-  renderNavBar() {
-    return (
-      <NavBar
-        mode="light"
-        icon={<i className="iconfont icon-back" />}
-        onLeftClick={() => this.props.history.go(-1)}
-      >
-        城市列表
-      </NavBar>
-    )
-  }
   // 动态计算每个title内容高度 virtualized
   caclHeight({ index }) {
     const firstWord = this.state.shortList[index]
@@ -93,7 +85,11 @@ class City extends React.Component {
       <div key={key} style={style} className="city-list">
         <div className="title">{this.configTitle(firstWord)}</div>
         {cities.map(v => (
-          <div key={v.value} className="name">
+          <div
+            key={v.value}
+            className="name"
+            onClick={this.selectCity.bind(this, v)}
+          >
             {v.label}
           </div>
         ))}
@@ -101,6 +97,15 @@ class City extends React.Component {
     )
   }
 
+  // 点击切换城市定位
+  selectCity(v) {
+    if (includeCities.includes(v.label)) {
+      setCity(v)
+      this.props.history.push('/')
+    } else {
+      Toast.info('该城市暂无房源信息', 1, null, true)
+    }
+  }
   // 获取当前滚动区域索引值 virtualized
   onRowsRendered({ startIndex }) {
     if (startIndex === this.state.currentCityShort) return false
@@ -144,26 +149,26 @@ class City extends React.Component {
   }
 
   moveTo(i) {
-    if (i === this.state.currentCityShort) return false
-    this.setState({
-      currentCityShort: i
-    })
+    this.listRef.current.scrollToRow(i)
   }
 
   render() {
     return (
       <div className="city">
-        <div className="navBar">{this.renderNavBar()}</div>
+        {/* 头部导航组件 */}
+        <NavHeader />
+        {/* 长列表滚动组件 */}
         <AutoSizer>
           {({ height, width }) => (
             <List
+              ref={this.listRef}
               width={width}
               height={height}
               rowCount={this.state.shortList.length}
               rowHeight={this.caclHeight.bind(this)}
               rowRenderer={this.rowRenderer.bind(this)}
               onRowsRendered={this.onRowsRendered.bind(this)}
-              scrollToIndex={this.state.currentCityShort}
+              scrollToAlignment="start"
             />
           )}
         </AutoSizer>
