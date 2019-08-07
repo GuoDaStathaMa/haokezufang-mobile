@@ -1,7 +1,7 @@
 // 封装定位工具
 import axios from 'axios'
 
-function getCity() {
+export function getCity() {
   return JSON.parse(localStorage.getItem('Positions'))
 }
 
