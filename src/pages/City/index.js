@@ -156,7 +156,7 @@ class City extends React.Component {
     return (
       <div className="city">
         {/* 头部导航组件 */}
-        <NavHeader />
+        <NavHeader>城市列表</NavHeader>
         {/* 长列表滚动组件 */}
         <AutoSizer>
           {({ height, width }) => (

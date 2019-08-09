@@ -12,7 +12,7 @@ class NavHeader extends React.Component {
         icon={<i className="iconfont icon-back" />}
         onLeftClick={() => this.props.history.go(-1)}
       >
-        城市列表
+        {this.props.children}
       </NavBar>
     )
   }
