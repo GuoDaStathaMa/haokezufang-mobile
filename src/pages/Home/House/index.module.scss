@@ -1,0 +1,17 @@
+.house {
+  :global {
+    .search-wrapper {
+      height: 45px;
+      background-color: #eee;
+      padding-left: 10px;
+      .search {
+        padding-left: 0px;
+        position: static;
+        .icon-map {
+          color: #00ae66;
+          font-size: 25px;
+        }
+      }
+    }
+  }
+}

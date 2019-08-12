@@ -1,7 +1,6 @@
 import React from 'react'
-import { getCityPosition } from 'tools'
+import { getCityPosition, API } from 'tools'
 import { Toast } from 'antd-mobile'
-import axios from 'axios'
 import NavHeader from 'common/NavHeader'
 import './index.scss'
 const BMap = window.BMap
@@ -35,9 +34,9 @@ class Map extends React.Component {
   }
   // 获取数据
   async getHouseSourse(id) {
-    Toast.loading('加载中', 60, null, true)
-    const res = await axios.get(`http://localhost:8080/area/map?id=${id}`)
-    const { status, body } = res.data
+    Toast.loading('加载中', 0)
+    const res = await API.get(`/area/map?id=${id}`)
+    const { status, body } = res
     if (status !== 200) return false
     const all = body
     const { type, nextZoom } = this.getTypeAndZoom()
@@ -47,7 +46,6 @@ class Map extends React.Component {
   // 判断渲染类型和缩放等级
   getTypeAndZoom() {
     const zoom = this.map.getZoom()
-    console.log(zoom)
     let type, nextZoom
     if (zoom === 11) {
       type = 'circle'
@@ -113,7 +111,7 @@ class Map extends React.Component {
       const point = new BMap.Point(v.coord.longitude, v.coord.latitude)
       let opts = {
         position: point, // 指定文本标注所在的地理位置
-        offset: new BMap.Size(-35, -35) //设置文本偏移量
+        offset: new BMap.Size(-50, -10) //设置文本偏移量
       }
       let label = new BMap.Label(
         `<div class="rect">
@@ -132,9 +130,12 @@ class Map extends React.Component {
       // 创建文本标注对象
       this.map.addOverlay(label)
 
-      label.addEventListener('click', () => {
+      label.addEventListener('click', e => {
         // 设置中心点
-        // this.map.centerAndZoom(point, nextZoom)
+        console.log(e)
+        const x = window.innerWidth / 2 - e.changedTouches[0].clientX
+        const y = (window.innerHeight - 300) / 2 - e.changedTouches[0].clientY
+        this.map.panBy(x, y)
         this.getHouseInfo(v.value)
       })
     })
@@ -147,9 +148,9 @@ class Map extends React.Component {
   }
 
   async getHouseInfo(id) {
-    Toast.loading('加载中', 60, null, true)
-    const res = await axios.get(`http://localhost:8080/houses?cityId=${id}`)
-    const { body } = res.data
+    Toast.loading('加载中', 0)
+    const res = await API.get(`/houses?cityId=${id}`)
+    const { body } = res
     this.setState({
       housesList: body.list,
       isShow: true
@@ -170,7 +171,6 @@ class Map extends React.Component {
   }
 
   renderHousesList() {
-    // 隐藏加载
     return this.state.housesList.map(v => (
       <div className="house" key={v.houseCode}>
         <div className="imgWrap">

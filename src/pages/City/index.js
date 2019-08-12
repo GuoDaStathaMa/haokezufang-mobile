@@ -1,10 +1,9 @@
 import React from 'react'
 import { Toast } from 'antd-mobile'
 import { AutoSizer, List } from 'react-virtualized'
-import { getCityPosition, setCity } from 'tools'
+import { getCityPosition, setCity, API } from 'tools'
 import NavHeader from 'common/NavHeader'
 import './index.scss'
-import axios from 'axios'
 // 北上广深
 const includeCities = ['北京', '上海', '广州', '深圳']
 // navBar_height
@@ -41,16 +40,15 @@ class City extends React.Component {
   }
   // 获取城市列表
   async getcitiesObj() {
-    const res = await axios.get(`http://localhost:8080/area/city?level=1`)
+    const res = await API.get(`/area/city?level=1`)
     // 处理数据
-    const { body, status } = res.data
+    const { body, status } = res
     if (status !== 200) return false
     let { citiesObj, shortList } = this.formatData(body)
     // 获取热门城市 存入对象
-    const hotRes = await axios.get(`http://localhost:8080/area/hot`)
+    const hotRes = await API.get(`/area/hot`)
     shortList.unshift('hot')
-    citiesObj.hot = hotRes.data.body
-    // 获取当前城市 存入shortList citiesObj
+    citiesObj.hot = hotRes.body
     let city = await getCityPosition()
     shortList.unshift('#')
     citiesObj['#'] = [city]
