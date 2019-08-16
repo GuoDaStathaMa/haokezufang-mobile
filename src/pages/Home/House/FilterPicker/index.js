@@ -37,6 +37,7 @@ class FilterPicker extends React.Component {
         <FilterFooter
           onSave={() => onSave(this.state.value)}
           onCancel={onCancel}
+          cancelText="取消"
         />
       </div>
     )

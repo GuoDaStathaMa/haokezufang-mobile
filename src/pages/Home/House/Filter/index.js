@@ -2,7 +2,7 @@ import React from 'react'
 import { getCityPosition, API } from 'tools'
 import FilterTitle from '../FilterTitle'
 import FilterPicker from '../FilterPicker'
-// import FilterMore from '../FilterMore'
+import FilterMore from '../FilterMore'
 import styles from './index.module.scss'
 
 class Filter extends React.Component {
@@ -35,38 +35,73 @@ class Filter extends React.Component {
   async getFiltersData() {
     const city = await getCityPosition()
     const res = await API.get(`/houses/condition?id=${city.value}`)
-    const { status, body } = res
-    if (status !== 200) return false
     this.setState({
-      filtersData: body
+      filtersData: res.body
     })
   }
 
   changeSelected = type => {
-    const { titleSelected } = this.state
+    const { titleSelected, selectedValues } = this.state
+    const newTitleSelected = { ...titleSelected }
+    Object.keys(selectedValues).forEach(v => {
+      if (v === type) {
+        newTitleSelected[v] = true
+      } else {
+        const result = this.getTitleSelected(v, selectedValues[v])
+        Object.assign(newTitleSelected, result)
+      }
+    })
     this.setState({
-      titleSelected: {
-        ...titleSelected,
-        [type]: true
-      },
+      titleSelected: newTitleSelected,
       openType: type
     })
   }
 
+  getTitleSelected(title, value) {
+    const obj = {}
+    const selectedVal = value.toString()
+    if (title === 'area' && selectedVal !== 'area,null') {
+      obj[title] = true
+    } else if (title === 'mode' && selectedVal !== 'null') {
+      obj[title] = true
+    } else if (title === 'price' && selectedVal !== 'null') {
+      obj[title] = true
+    } else if (title === 'more' && value.length > 0) {
+      obj[title] = true
+    } else {
+      obj[title] = false
+    }
+    return obj
+  }
+
   onSave = value => {
-    const { openType, selectedValues } = this.state
+    const { openType, selectedValues, titleSelected } = this.state
+    // 处理高亮
+    const result = this.getTitleSelected(openType, value)
+
     this.setState({
       openType: '',
       selectedValues: {
         ...selectedValues,
         [openType]: value
+      },
+      titleSelected: {
+        ...titleSelected,
+        ...result
       }
     })
   }
 
   onCancel = () => {
+    const { openType, selectedValues, titleSelected } = this.state
+    const result = this.getTitleSelected(openType, selectedValues[openType])
+
     this.setState({
-      openType: ''
+      openType: '',
+      titleSelected: {
+        ...titleSelected,
+        ...result
+      }
     })
   }
 
@@ -94,6 +129,7 @@ class Filter extends React.Component {
     }
     return (
       <FilterPicker
+        key={openType}
         onSave={this.onSave}
         onCancel={this.onCancel}
         data={data}
@@ -101,6 +137,27 @@ class Filter extends React.Component {
         defaultSelect={defaultSelect}
       />
     )
+  }
+  // 渲染more组件
+  renderMore() {
+    const {
+      openType,
+      selectedValues,
+      filtersData: { characteristic, floor, oriented, roomType }
+    } = this.state
+    const data = { characteristic, floor, oriented, roomType }
+    if (openType === 'more') {
+      return (
+        <FilterMore
+          {...data}
+          onSave={this.onSave}
+          onCancel={this.onCancel}
+          defaultSelect={selectedValues['more']}
+        />
+      )
+    } else {
+      return null
+    }
   }
 
   // 渲染遮罩
@@ -127,7 +184,7 @@ class Filter extends React.Component {
           {this.renderFilterPicker()}
 
           {/* FilterMore组件 */}
-          {/* <FilterMore /> */}
+          {this.renderMore()}
         </div>
       </div>
     )
